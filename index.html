@@ -71,9 +71,16 @@
     @media (min-width: 1024px) { .carousel-slide { flex: 0 0 33.3333%; } }
 
     /* Lightbox */
-    .lightbox { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 999; justify-content: center; align-items: center; }
+    .lightbox { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.94); z-index: 999; justify-content: center; align-items: center; padding: 40px 20px; }
     .lightbox.active { display: flex; }
-    .lightbox img { max-width: 92%; max-height: 92%; box-shadow: 0 30px 80px rgba(0,0,0,0.6); }
+    .lightbox-content { max-width: 1100px; width: 100%; display: flex; flex-direction: column; align-items: center; text-align: center; }
+    .lightbox img { max-width: 100%; max-height: 72vh; object-fit: contain; box-shadow: 0 30px 80px rgba(0,0,0,0.6); }
+    .lightbox-caption { margin-top: 24px; color: #FDFBF7; }
+    .lightbox-caption h3 { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 26px; font-weight: 500; line-height: 1.2; }
+    .lightbox-caption a { display: inline-flex; align-items: center; gap: 10px; margin-top: 18px; padding: 14px 26px; background: #FDFBF7; color: #1A1A1A; font-size: 12px; letter-spacing: 0.22em; text-transform: uppercase; transition: background 0.2s ease; }
+    .lightbox-caption a:hover { background: #E6E2DB; }
+    .lightbox-close { position: absolute; top: 24px; right: 28px; background: transparent; border: 0; color: #FDFBF7; font-size: 34px; line-height: 1; cursor: pointer; opacity: 0.75; transition: opacity 0.2s ease; }
+    .lightbox-close:hover { opacity: 1; }
 
     /* Nav */
     .nav-link { transition: color 0.2s ease; }
@@ -84,8 +91,9 @@
     .art-card:hover img { transform: scale(1.03); }
 
     /* Social icons */
-    .ico.icon-social { width: 36px; height: 36px; object-fit: contain; display: inline-block; vertical-align: middle; }
-.icon-social-lg { width: 48px; height: 48px; object-fit: contain; display: inline-block; vertical-align: middle; }n-social 
+    .icon-social { width: 36px; height: 36px; object-fit: contain; display: inline-block; vertical-align: middle; }
+    .icon-social-lg { width: 48px; height: 48px; object-fit: contain; display: inline-block; vertical-align: middle; }
+
     @media (prefers-reduced-motion: reduce) {
       * { transition: none !important; animation: none !important; }
       html { scroll-behavior: auto; }
@@ -184,14 +192,23 @@
 
   <!-- ============== LIGHTBOX ============== -->
   <div id="lightbox" class="lightbox" role="dialog" aria-modal="true" aria-label="Artwork preview">
-    <img id="lightboxImg" src="" alt="" />
+    <button class="lightbox-close" aria-label="Close" id="lightboxClose">×</button>
+    <div class="lightbox-content" id="lightboxContent">
+      <img id="lightboxImg" src="" alt="" />
+      <div class="lightbox-caption">
+        <h3 id="lightboxTitle"></h3>
+        <a id="lightboxBuy" href="#" target="_blank" rel="noopener noreferrer">
+          Buy this print on FAA <span aria-hidden="true">↗</span>
+        </a>
+      </div>
+    </div>
   </div>
 
   <!-- ============== ABOUT ============== -->
   <section id="about" class="py-20 md:py-28 bg-[#F5F0E8] scroll-mt-20">
     <div class="max-w-[1248px] mx-auto px-6 md:px-8">
       <div class="grid grid-cols-1 md:grid-cols-12 gap-10 md:gap-16 items-start">
-        <!-- Image (smaller, portrait 4:5, not cropped) -->
+        <!-- Image -->
         <div class="md:col-span-4 flex justify-center md:justify-start">
           <div class="w-full max-w-[280px] md:max-w-[320px] aspect-[4/5] overflow-hidden bg-[#E6E2DB]">
             <img src="images/talimit-foto.jpg" alt="Tali Mitchell" class="w-full h-full object-cover object-top" loading="lazy" />
@@ -219,7 +236,7 @@
             <p class="mt-3 text-[14px] md:text-[15px] text-muted max-w-[520px]">
               Explore our visual metaphors inspired by Epistoism philosophy on Pinterest.
             </p>
-            <div class="mt-6 flex items-center gap-6fff">
+            <div class="mt-6 flex items-center gap-6">
               <a href="https://www.pinterest.com/Epistoism/" target="_blank" rel="noopener noreferrer" aria-label="Pinterest" class="inline-flex items-center justify-center hover:opacity-75 transition">
                 <img src="images/pinterest.png" alt="Pinterest" class="icon-social-lg" />
               </a>
@@ -245,7 +262,7 @@
           <p class="text-[13px] text-muted mt-6 max-w-[320px]">© 2026 Tali Mitchell Art. All rights reserved.</p>
         </div>
 
-        <div class="md:col-span-3">
+        <div class="md:col-span-4">
           <span class="text-[10px] tracking-[0.28em] uppercase text-muted">Official Store Partner</span>
           <div class="mt-3">
             <a href="https://tali-mitchell.pixels.com/" target="_blank" rel="noopener noreferrer" class="text-[14px] text-charcoal hover:text-accent underline-offset-4 hover:underline">
@@ -272,31 +289,46 @@
   <!-- ============== SCRIPTS ============== -->
   <script>
     const artworks = [
-      { file: 'chess-and-marcus-aurelius.jpg',     title: 'Chess and Marcus Aurelius',           tag: 'Dark Academia' },
-      { file: 'tuscan-window-crimson-sunset.jpg',  title: 'Tuscan Window — Crimson Sunset',      tag: 'Mediterranean' },
-      { file: 'marcus-aurelius-seneca-epictetus.jpg', title: 'Marcus Aurelius, Seneca, Epictetus', tag: 'Stoic Philosophy' },
-      { file: 'tuscan-window-morning-mist.jpg',    title: 'Tuscan Window — Morning Mist',        tag: 'Mediterranean' },
-      { file: 'tuscan-window-ii-golden-noon.jpg',  title: 'Tuscan Window II — Golden Noon',      tag: 'Mediterranean' },
-      { file: 'misty-sunrise-over-rolling-hills.jpg', title: 'Misty Sunrise Over Rolling Hills', tag: 'Landscape' },
-      { file: 'the-path-we-choose.jpg',            title: 'The Path We Choose',                  tag: 'Symbolic Landscape' },
-      { file: 'unmoved-by-the-storm.jpg',          title: 'Unmoved by the Storm',                tag: 'Stoic Art' },
-      { file: 'coffee-by-the-sea.jpg',             title: 'Coffee by the Sea',                   tag: 'Mediterranean' },
-      { file: 'kintsugi-beauty-in-imperfection.jpg', title: 'Kintsugi — Beauty in Imperfection', tag: 'Eastern Wisdom' },
-      { file: 'guan-yu.jpg',                       title: 'Guan Yu',                             tag: 'Eastern Wisdom' },
-      { file: 'serenity-amidst-chaos.jpg',         title: 'Serenity Amidst Chaos',               tag: 'Portrait' },
-      { file: 'self-shadow.jpg',                   title: 'Self Shadow',                         tag: 'Portrait' },
-      { file: 'the-starry-heavens-above-kant.jpg', title: 'The Starry Heavens Above Kant',       tag: 'Philosophical' }
+      { file: 'chess-and-marcus-aurelius.jpg',     title: 'Chess and Marcus Aurelius',           tag: 'Dark Academia',
+        url: 'https://fineartamerica.com/featured/chess-and-stoicism-tali-mitchell.html?product=poster' },
+      { file: 'tuscan-window-crimson-sunset.jpg',  title: 'Tuscan Window — Crimson Sunset',      tag: 'Mediterranean',
+        url: 'https://fineartamerica.com/featured/tuscan-window-iii-crimson-sunset-tali-mitchell.html?product=poster' },
+      { file: 'marcus-aurelius-seneca-epictetus.jpg', title: 'Marcus Aurelius, Seneca, Epictetus', tag: 'Stoic Philosophy',
+        url: 'https://fineartamerica.com/featured/marcus-aurelius-seneca-epictetus-three-stoics-tali-mitchell.html?product=poster' },
+      { file: 'tuscan-window-morning-mist.jpg',    title: 'Tuscan Window — Morning Mist',        tag: 'Mediterranean',
+        url: 'https://fineartamerica.com/featured/tuscan-window-morning-mist-tali-mitchell.html?product=poster' },
+      { file: 'tuscan-window-ii-golden-noon.jpg',  title: 'Tuscan Window II — Golden Noon',      tag: 'Mediterranean',
+        url: 'https://fineartamerica.com/featured/tuscan-window-ii-golden-noon-tali-mitchell.html?product=poster' },
+      { file: 'misty-sunrise-over-rolling-hills.jpg', title: 'Misty Sunrise Over Rolling Hills', tag: 'Landscape',
+        url: 'https://fineartamerica.com/featured/misty-sunrise-over-rolling-hills-tali-mitchell.html?product=poster' },
+      { file: 'the-path-we-choose.jpg',            title: 'The Path We Choose',                  tag: 'Symbolic Landscape',
+        url: 'https://fineartamerica.com/featured/1-the-path-we-choose-tali-mitchell.html?product=poster' },
+      { file: 'unmoved-by-the-storm.jpg',          title: 'Unmoved by the Storm',                tag: 'Stoic Art',
+        url: 'https://fineartamerica.com/featured/unmoved-by-the-storm-tali-mitchell.html?product=poster' },
+      { file: 'coffee-by-the-sea.jpg',             title: 'Coffee by the Sea',                   tag: 'Mediterranean',
+        url: 'https://fineartamerica.com/featured/coffee-by-the-sea-golden-hour-coastal-beach-tali-mitchell.html?product=poster' },
+      { file: 'kintsugi-beauty-in-imperfection.jpg', title: 'Kintsugi — Beauty in Imperfection', tag: 'Eastern Wisdom',
+        url: 'https://fineartamerica.com/featured/kintsugi-beauty-in-imperfection-tali-mitchell.html?product=poster' },
+      { file: 'guan-yu.jpg',                       title: 'Guan Yu',                             tag: 'Eastern Wisdom',
+        url: 'https://fineartamerica.com/featured/honor-never-goes-out-of-style-guan-yu-tali-mitchell.html?product=poster' },
+      { file: 'serenity-amidst-chaos.jpg',         title: 'Serenity Amidst Chaos',               tag: 'Portrait',
+        url: 'https://fineartamerica.com/featured/serenity-amidst-chaos-tali-mitchell.html?product=poster' },
+      { file: 'self-shadow.jpg',                   title: 'Self Shadow',                         tag: 'Portrait',
+        url: 'https://fineartamerica.com/featured/self-shadow-tali-mitchell.html?product=poster' },
+      { file: 'the-starry-heavens-above-kant.jpg', title: 'The Starry Heavens Above Kant',       tag: 'Philosophical',
+        url: 'https://fineartamerica.com/featured/the-starry-heavens-above-kant-tali-mitchell.html?product=poster' }
     ];
 
     const IMG_BASE = 'images/';
 
+    // ===== Build slides =====
     const track = document.getElementById('carouselTrack');
-    artworks.forEach((art) => {
+    artworks.forEach((art, idx) => {
       const slide = document.createElement('div');
       slide.className = 'carousel-slide';
       slide.innerHTML = `
         <article class="art-card flex flex-col h-full">
-          <div class="aspect-[3/4] overflow-hidden bg-[#E6E2DB] cursor-pointer" data-lightbox="${IMG_BASE}${art.file}" data-title="${art.title}">
+          <div class="aspect-[3/4] overflow-hidden bg-[#E6E2DB] cursor-pointer" data-lightbox-index="${idx}">
             <img src="${IMG_BASE}${art.file}" alt="${art.title}" class="w-full h-full object-cover" loading="lazy" />
           </div>
           <div class="pt-5 flex flex-col flex-1">
@@ -308,6 +340,7 @@
       track.appendChild(slide);
     });
 
+    // ===== Carousel logic =====
     let currentIndex = 0;
     let slidesPerView = 3;
     let autoTimer = null;
@@ -349,6 +382,7 @@
 
     function stopAuto() { if (autoTimer) { clearInterval(autoTimer); autoTimer = null; } }
 
+    // ===== Dots =====
     const dotsContainer = document.getElementById('dotsContainer');
     function renderDots() {
       const total = maxIndex() + 1;
@@ -362,13 +396,16 @@
       }
     }
 
+    // ===== Arrows =====
     document.getElementById('nextBtn').addEventListener('click', nextSlide);
     document.getElementById('prevBtn').addEventListener('click', prevSlide);
 
+    // ===== Pause on hover =====
     const carousel = document.querySelector('#gallery');
     carousel.addEventListener('mouseenter', () => { isPaused = true; });
     carousel.addEventListener('mouseleave', () => { isPaused = false; });
 
+    // ===== Init carousel =====
     updateSlidesPerView();
     updateTrack();
     startAuto();
@@ -378,34 +415,51 @@
       updateTrack();
     });
 
-    // Lightbox
+    // ===== Lightbox =====
     const lightbox = document.getElementById('lightbox');
     const lightboxImg = document.getElementById('lightboxImg');
+    const lightboxTitle = document.getElementById('lightboxTitle');
+    const lightboxBuy = document.getElementById('lightboxBuy');
+    const lightboxClose = document.getElementById('lightboxClose');
+    const lightboxContent = document.getElementById('lightboxContent');
 
-    track.addEventListener('click', (e) => {
-      const trigger = e.target.closest('[data-lightbox]');
-      if (!trigger) return;
-      lightboxImg.src = trigger.dataset.lightbox;
-      lightboxImg.alt = trigger.dataset.title || '';
+    function openLightbox(index) {
+      const art = artworks[index];
+      if (!art) return;
+      lightboxImg.src = IMG_BASE + art.file;
+      lightboxImg.alt = art.title;
+      lightboxTitle.textContent = art.title;
+      lightboxBuy.href = art.url;
       lightbox.classList.add('active');
       isPaused = true;
-    });
+    }
 
-    lightbox.addEventListener('click', () => {
+    function closeLightbox() {
       lightbox.classList.remove('active');
       lightboxImg.src = '';
       isPaused = false;
+    }
+
+    track.addEventListener('click', (e) => {
+      const trigger = e.target.closest('[data-lightbox-index]');
+      if (!trigger) return;
+      openLightbox(parseInt(trigger.dataset.lightboxIndex, 10));
     });
+
+    // Close when clicking on backdrop (not on content)
+    lightbox.addEventListener('click', (e) => {
+      if (!lightboxContent.contains(e.target)) closeLightbox();
+    });
+
+    lightboxClose.addEventListener('click', closeLightbox);
 
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && lightbox.classList.contains('active')) {
-        lightbox.classList.remove('active');
-        lightboxImg.src = '';
-        isPaused = false;
+        closeLightbox();
       }
     });
 
-    // Mobile burger
+    // ===== Mobile burger =====
     const burgerBtn = document.getElementById('burgerBtn');
     const mobileMenu = document.getElementById('mobileMenu');
     burgerBtn.addEventListener('click', () => {
